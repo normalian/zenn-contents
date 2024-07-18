@@ -3,7 +3,8 @@ title: "Semantic Kernel で Text-To-Speech と Speech-To-Text を試す"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["SemanticKernel", "AI", "Java"]
-published: false
+published: true
+publication_name: "microsoft"
 ---
 
 前回に引き続いて Java 版の Semantic Kernel を試したいと思います。掲題の通りに Text-To-Speech と Speech-To-Text を試したいと思いますが、それぞれ個別の AI モデルを利用します。具体的には以下となります。

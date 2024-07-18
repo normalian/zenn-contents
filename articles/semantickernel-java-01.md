@@ -3,7 +3,8 @@ title: "Semantic Kernel の Java SDK を試す"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["SemanticKernel", "AI", "Java"]
-published: false
+published: true
+publication_name: "microsoft"
 ---
 
 前回の記事でも記載しましたが、Semantic Kernel は Microsoft が提供する OpenAI/Azure OpenAI/Hugging Face 等の LLM を統合する SDK となります。.NET/Python/Java で提供されているものの、Java 側のノウハウ公開が少ないなと思ったので今回はこちらを記載したいと思います。また、ご存じでない方もいらっしゃると思いますが、実は Java 版の Semantic Kernel は既に GA（一般リリース）されています。
