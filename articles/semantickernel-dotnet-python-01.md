@@ -15,7 +15,7 @@ publication_name: "microsoft"
 - Azure AI Search のリソース
 
 ### Python で Azure AI Search にデータを格納する
-まずは Python 側のソースコードを見てみましょう。以下のように Normalian Co.,Ltd. という架空の会社に関する情報を格納しておきます。collection id はデフォルトでも generic ですが、変えたいことも多いと思いますので、サンプルとして明確に指定しています。Python 側の非
+まずは Python 側のソースコードを見てみましょう。以下のように Normalian Co.,Ltd. という架空の会社に関する情報を格納しておきます。collection id はデフォルトでも generic ですが、変えたいことも多いと思いますので、サンプルとして明確に指定しています。
 
 ```python
 import asyncio
