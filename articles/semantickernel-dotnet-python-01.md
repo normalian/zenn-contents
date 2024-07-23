@@ -2,7 +2,7 @@
 title: "Semantic Kernel でバックエンドは Python & フロントエンドは C# を動かしてみる"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["SemanticKernel", "AI", "C#", "Python"]
+topics: ["SemanticKernel", "AI", "csharp", "Python"]
 published: true
 publication_name: "microsoft"
 ---
