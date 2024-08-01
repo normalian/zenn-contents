@@ -7,8 +7,10 @@ published: true
 publication_name: "microsoft"
 ---
 
-※注 こちらの記事は [Run Phi-3 SLM on your machine with C# Semantic Kernel and Ollama](https://laurentkempe.com/2024/05/01/run-phi-3-slm-on-your-machine-with-csharp-semantic-kernel-and-ollama/) の内容を踏襲したものになります。既にご存じのかたも多いと思いますが、2024 年に Microsoft は Small-Language-Model(SLM) として [Phi-3](https://azure.microsoft.com/ja-jp/products/phi-3) を発表しています。
-GPT シリーズに代表される Large-Language-Model(LLM) が台頭しましたが、すべての問題に単一のモデルに対応するのも限界が見えている気がしています。ユーザの間口は個別の問題は LLM で受けて個別の問題に分割し、それぞれを fine-tuning した SLM で解決するようなマルチモデルのエージェント方式がはやるのかなーとか思っていたりします（個人の主観です）。
+※注 こちらの記事は [Run Phi-3 SLM on your machine with C# Semantic Kernel and Ollama](https://laurentkempe.com/2024/05/01/run-phi-3-slm-on-your-machine-with-csharp-semantic-kernel-and-ollama/) の内容を踏襲したものになります。
+
+既にご存じのかたも多いと思いますが、2024 年に Microsoft は Small-Language-Model(SLM) として [Phi-3](https://azure.microsoft.com/ja-jp/products/phi-3) を発表しています。
+個人の主観となりますが、GPT シリーズに代表される Large-Language-Model(LLM) が台頭した一方、すべての問題に単一のモデルに対応するのも限界が見えている気がしています。ユーザの間口となるところで個別の問題に詳細化するところは LLM で受け、個々の問題を fine-tuning した SLM で解決するようなマルチモデルのエージェント方式がはやるのかなーとか思っていたりします（何度も言いますが個人の主観です）。
 
 さて、そんな中で Phi-3 を今更動かしてもしょうがないので「Semantic Kernel から呼べないかな～」とか思っていたら冒頭の記事を発見したのでためてみました。特筆すべきポイントはすべて自端末で完結することです。[Ollama](https://www.ollama.com/) を利用することで SLM/LLM を自端末で動かすことができ、OpenAI の Chat Completions API と互換機能を持つので容易に自身のコードに組み込むことが可能です。
 
