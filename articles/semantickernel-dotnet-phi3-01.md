@@ -64,7 +64,7 @@ while (true)
 ```
 
 実行結果は以下の様になります。13th Gen Intel(R) Core(TM) i7-1365U 1.80 GHz, RAM 16.0 GB の ThinkPad では動きがやや重く、以下の様な簡単な質問に対する最初の一単語を返すのにも１分弱かかっています。
-![](/images/semantickernel-dotnet-phi3-01/image01.png) 
+![](/images/semantickernel-dotnet-phi3-01/image02.png) 
 
 また、IChatCompletionService.GetStreamingChatMessageContentsAsync メソッドは単語単語で都度返してくれるにも拘わらず上記の時間がかかりましたが、IChatCompletionService.GetChatMessageContentAsync メソッドを利用した際は 100 秒上限に引っかかってタイムアウトとなりました。この辺りはハードウェア側の問題になると思いますが、考慮が必要になる点だと思います。
 
