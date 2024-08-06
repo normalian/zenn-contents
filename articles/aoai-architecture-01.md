@@ -66,6 +66,7 @@ You are an expert of Microsoft Azure. You assist Microsoft Azure architecture de
 - 製品カタログのデータベースサイズは 50GB で、年間 5% 程度データ量が増加する
 - 製品カタログは主に読み込み用途で利用される
 - 外部アクセスからのセキュリティ担保は SSL 暗号化通信を想定しているが、内部ユーザ（カタログ更新）は SSL に加えたオンプレミスからの閉域ネットワークを想定```
+```
 
 帰ってきた結果は以下になります。
 
