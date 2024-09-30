@@ -3,25 +3,26 @@ title: "Network Manager を使って Entra ID テナント跨ぎの cross-tenant
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Network", "Azure"]
-published: false
+published: true
 publication_name: "microsoft"
 ---
 
-皆さんは Network Manager と呼ばれる機能をご存じでしょうか？Network Manager は VNET 間のネットワーク接続設定やルールを一元的に管理し、Azure Policy 等と組み合わせて中央管理するサービスです。VNET が増えてくると個別に VNET Peering や NSG の設定等を行うのが煩雑になるので、それを中央集権的に管理できるのが主な特徴です。
+皆さんは Network Managers と呼ばれる機能をご存じでしょうか？Network Managers は VNET 間のネットワーク接続設定やルールを一元的に管理し、Azure Policy 等と組み合わせて中央管理するサービスです。VNET が増えてくると個別に VNET Peering や NSG の設定等を行うのが煩雑になるので、それを中央集権的に管理できるのが主な特徴です。
 
-正直言うと私も含め大半の方は「VNET 一個でもそこそこ使えるし、hub-spoke とかやりたかったら VNET Peering 使うからそれで十分じゃないの？」という感じだと思われます。そんなこんなであんまり触らずにいたのですが、ふと見つけた以下の記事が目を引いたので、特にこちらにフォーカスしつつ Network Manager を紹介したいと思います。
+大半の方は「VNET 一個でもそこそこ使えるし、hub-spoke とかやりたかったら VNET Peering 使うからそれで十分じゃないの？」という感じだと思われます。そんなこんなで私もあんまり触らずにいたのですが、ふと見つけた以下の記事が目を引いたので、特にこちらにフォーカスしつつ Network Manager を紹介したいと思います。
 [Azure Virtual Network Manager でのテナント間サポート](https://learn.microsoft.com/ja-jp/azure/virtual-network-manager/concept-cross-tenant) 
 
-念のためですが、VNET Peering 自体も Entra ID cross-tenant 接続をサポートしています。本設定は VNET が少数の場合であれば問題ないのですが、VNET の数が増えた場合はやはり Network Manager に軍配が上がると思います。
-[仮想ネットワーク ピアリングの作成 - Resource Manager、さまざまなサブスクリプション、Microsoft Entra テナント
-](https://learn.microsoft.com/ja-jp/azure/virtual-network/create-peering-different-subscriptions?tabs=create-peering-portal)
+念のためですが、VNET Peering 自体も Entra ID cross-tenant 接続をサポートしています。本設定は VNET が少数の場合であれば問題ないのですが、VNET の数が増えた場合はやはり管理しやすさは Network Managers に軍配が上がると思います。
+[仮想ネットワーク ピアリングの作成 - Resource Manager、さまざまなサブスクリプション、Microsoft Entra テナント](https://learn.microsoft.com/ja-jp/azure/virtual-network/create-peering-different-subscriptions?tabs=create-peering-portal)
 
 Entra ID のテナントをまたぐので、当然ですがポータル上で Entra ID のテナント切り替えが処理必要になります。また、実施前に以下の点に注意が必要です。
 - 接続元 VNET がある Entra ID テナント配下で Network Managers というリソースを作成する
 - 接続先 VNET がある Entra ID テナント配下の Virtual Network Managers というメニュー配下の cross-tenant connections を作成する
 
+これをアーキテクチャ図に表すと以下になります。アイコンは同じですが、Network Managers と Virtual Network Managers は異なるメニューです。
+![](/images/network-manager-01/image-arch.png) 
+
 Virtual Network Managers というメニュー配下に Network Managers と cross-tenant connections がありますが、 cross-tenant connections からは Virtual Network Managers から参照する必要があるのでこの流れになります。接続元と先では異なるリソースを作成する必要があり、特に接続先のサブスクリプションでは Network Managers リソースを作成する必要がない点に注意が必要です。（むしろ両方のサブスクリプションに作ると接続状態が Conflict とエラーになり接続できません）。
-（※※※イメージ）
 
 ## Network Manager リソースの作成
 まずは接続元の Entra ID 配下のサブスクリプションで Network Manager を作ってみましょう。ポータルの同リソース作成メニューから進むと以下の Basic タブが表示されます。今回は NET 同士を接続するために利用するので Connectivity にチェックをします。Network Security Group や User Defined Route 等を中央管理したい場合は他のメニューもチェックしますが、今回はスキップします。
@@ -62,7 +63,7 @@ Virtual Network Managers というメニュー配下に Network Managers と cro
 ![](/images/network-manager-01/image11.png) 
 
 これで接続対象の VNET を含めて Network Group に含めることができました。こちらの後は Network Manager 通常の操作と同様です。以下の記事をベースに紹介します。
-[https://learn.microsoft.com/ja-jp/azure/virtual-network-manager/how-to-create-mesh-network](Azure Virtual Network Manager を使用してメッシュ ネットワーク トポロジを作成する)
+[Azure Virtual Network Manager を使用してメッシュ ネットワーク トポロジを作成する](https://learn.microsoft.com/ja-jp/azure/virtual-network-manager/how-to-create-mesh-network)
 
 Network Manager の Settings -> Configurations メニューから Create -> Connectivity configuration を選択し、今回は Mesh 構成を選択します。この際にリージョンをまたぐ場合は以下の Enable mesh connectivity across regions のチェックボックスを有効化するのを忘れないようにしてください。
 ![](/images/network-manager-01/image12.png) 
