@@ -17,17 +17,20 @@ publication_name: "microsoft"
 ## 前提条件
 C# を利用して Semantic Kernel のアプリケーションを動かす前に Ollama をダウンロードし、Ollama 上に Phi-3 のモデルをダウンロードする必要があります。[Ollama - download](https://www.ollama.com/download) からインストールファイルを取得して設定してください。Windows であればインストーラを実行するだけで完了するはずです。インストール後、コマンドプロンプトを立ち上げて以下のコマンドを実行することで Phi-3 モデルが自端末上で実行されます。
 
+**2025年2月4日追記：** Microsoft.SemanticKernel に加えて Microsoft.SemanticKernel.Connectors.Ollama の NuGet ライブラリをインストールする必要があります
+
 ```txt
-ollama pull phi3:latest
+>ollama pull phi3:latest
+>ollama run phi3:latest
 ```
 
-コマンドを実行する際、2GB ほどのデータをダウンロードするので帯域に注意してください。
+コマンドを実行する際、2GB ほどのデータをダウンロードするのでネットワーク帯域に注意してください。
 ![](/images/semantickernel-dotnet-phi3-01/image01.png) 
 
 ## Semantic Kernel のソースコードを実行
 
 Visual Studio を立ち上げ、以下の C# ソースコード を作成してください。以下に記載のある localhost のエンドポイントは Ollama が自端末で実行されているので、そちらにアクセスしています。Ollama 内ではデプロイ済の Phi-3 が公開されているので、モデルを指定してアクセスしています。
-
+**2025年2月4日追記：** AddOpenAIChatCompletion でなく AddOllamaChatCompletion というメソッドを使わないとエラーになる様になりました
 
 ```csharp
 using Microsoft.SemanticKernel;
@@ -36,11 +39,10 @@ using System.Text;
 
 Console.WriteLine("Hello, World!");
 
-#pragma warning disable SKEXP0010
+#pragma warning disable SKEXP0070
 var kernel = Kernel.CreateBuilder()
-    .AddOpenAIChatCompletion(
-        modelId: "phi3", 
-        apiKey: null, 
+    .AddOllamaChatCompletion(
+        modelId: "phi3:latest",
         endpoint: new Uri("http://localhost:11434")).Build();
 
 var chat = kernel.GetRequiredService<IChatCompletionService>();
@@ -61,7 +63,7 @@ while (true)
     Console.WriteLine();
     chatHistory.AddAssistantMessage(builder.ToString());
 
-    Console.WriteLine();   
+    Console.WriteLine();
 }
 ```
 
