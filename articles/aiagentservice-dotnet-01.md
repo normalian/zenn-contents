@@ -9,7 +9,7 @@ publication_name: "microsoft"
 
 昨年末ごろにリリースされた Azure AI Agent service は皆様利用されているでしょうか？簡単に AI Agent が作れるという触れ込みで出たサービスですが、学習を兼ねてまとめたものをこちらに記載させて頂きます。
 
-** Azure AI Agent service のリソース作成
+## Azure AI Agent service のリソース作成
 
 まずはリソースを作製するので、以下の記事を参照に AI Foundry 経由でサービスを作成します。
 [Learn / Azure / AI Services / Agents / Quickstart: Create a new agent](https://learn.microsoft.com/en-us/azure/ai-services/agents/quickstart?view=azure-dotnet-preview&pivots=ai-foundry)
@@ -47,7 +47,7 @@ Files を選択すると以下の様に Vector ストアを作成しつつファ
 アップロードが上手く行けば以下の様にファイルが格納された Vector ストアが作成されます。
 ![](/images/aiagentservice-dotnet-01/image11.png) 
 
-** Azure AI Agent service でのプログラミング
+## Azure AI Agent service でのプログラミング
 
 では C# で作成した AI Agent を利用してみましょう。参考にするのは以下の記事です。
 [Learn / Azure / AI Services / Agents / Quickstart: Create a new agent - C#](https://learn.microsoft.com/en-us/azure/ai-services/agents/quickstart?view=azure-dotnet-preview&pivots=ai-foundry)
