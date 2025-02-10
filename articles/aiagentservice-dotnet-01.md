@@ -1,5 +1,5 @@
 ---
-title: "Azure AI Agent で簡単 RAG を実装する"
+title: "Azure AI Agent Service で簡単 RAG を実装する"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Azure AI Agent", "AI", "csharp"]
@@ -7,12 +7,13 @@ published: true
 publication_name: "microsoft"
 ---
 
-昨年末ごろにリリースされた Azure AI Agent service は皆様利用されているでしょうか？簡単に AI Agent が作れるという触れ込みで出たサービスですが、学習を兼ねてまとめたものをこちらに記載させて頂きます。
+昨年末ごろにリリースされた Azure AI Agent Service は皆様利用されているでしょうか？以下の記事にも記載がありますが、2025年2月現在では Public Preview のサービスで、簡単に AI Agent が作れるという触れ込みで出たサービスです。学習を兼ねてまとめたものをこちらに記載させて頂きます。
+[What's new in Azure AI Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/whats-new#february-2025)
 
-## Azure AI Agent service のリソース作成
+## Azure AI Agent Service のリソース作成
 
 まずはリソースを作製するので、以下の記事を参照に AI Foundry 経由でサービスを作成します。
-[Learn / Azure / AI Services / Agents / Quickstart: Create a new agent](https://learn.microsoft.com/en-us/azure/ai-services/agents/quickstart?view=azure-dotnet-preview&pivots=ai-foundry)
+[Learn / Azure / AI Services / Agents / Quickstart: Create a new agent - AI Foundry](https://learn.microsoft.com/en-us/azure/ai-services/agents/quickstart?view=azure-dotnet-preview&pivots=ai-foundry)
 
 まずは Azure AI Foundry のポータルである https://ai.azure.com/ にアクセスします。以下の様にプロジェクト一覧が表示されている場合はそのまま「+ Create Project」のボタンを押してください。
 ![](/images/aiagentservice-dotnet-01/image01.png) 
@@ -47,7 +48,7 @@ Files を選択すると以下の様に Vector ストアを作成しつつファ
 アップロードが上手く行けば以下の様にファイルが格納された Vector ストアが作成されます。
 ![](/images/aiagentservice-dotnet-01/image11.png) 
 
-## Azure AI Agent service でのプログラミング
+## Azure AI Agent Service でのプログラミング
 
 では C# で作成した AI Agent を利用してみましょう。参考にするのは以下の記事です。
 [Learn / Azure / AI Services / Agents / Quickstart: Create a new agent - C#](https://learn.microsoft.com/en-us/azure/ai-services/agents/quickstart?view=azure-dotnet-preview&pivots=ai-foundry)
