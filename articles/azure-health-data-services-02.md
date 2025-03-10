@@ -11,11 +11,14 @@ publication_name: "microsoft"
 [Configure settings for $convert-data by using the Azure portal](https://learn.microsoft.com/en-us/azure/healthcare-apis/fhir/convert-data-configuration)
 
 Azure Data Factory も以下の様にデータ変換のコンポーネントを持っている風ですが、実態は上記の $convert-data API を Azure Data Factory で呼んでいるだけなので、重要なのは API の使い方自体になるのは御推察頂けると思います。加えて、同 API 自体は Docker コンテナイメージとして公開しているのでオンプレでの利用も可能です。
-[Configure settings for $convert-data by using the Azure portal](https://learn.microsoft.com/en-us/azure/healthcare-apis/fhir/convert-data-configuration)
 https://learn.microsoft.com/en-us/azure/healthcare-apis/fhir/convert-data-azure-data-factory
 
 
-以下の GitHub の [FHIR Converter](https://github.com/microsoft/fhir-converter?tab=readme-ov-file) を参照してもらえればと思いますが、以下の変換に対応しています。
+GitHub で公開されている FHIR Converter
+
+https://github.com/microsoft/fhir-converter?tab=readme-ov-file
+
+を参照してもらえればと思いますが、以下の変換に対応しています。
 - HL7v2 to FHIR
 - C-CDA to FHIR	
 - JSON to FHIR	
@@ -34,7 +37,8 @@ MSH|^~\\&|SIMHOSP|SFAC|RAPP|RFAC|20200508131015||ADT^A01|517|T|2.3|||AL||44|ASCI
 
 ```
 
-上記はのデータは HL7v2 の ADT（Admission, Discharge, and Transfer） メッセージの一種で、患者の新規登録（A01：患者入院（入院または登録））を表します。こちらも元記事の API に記載がありますが、そのためのパラメータである ADT_A01 も指定する必要があります。では早速実際に処理を行うソースコードを例示します。元記事のサンプルの文字列を利用したらデータ形式がやや異なっていたようなので、ソースコード内に注釈をつけました。利用するライブラリは以下です。
+上記はのデータは HL7v2 の ADT（Admission, Discharge, and Transfer） メッセージの一種で、患者の新規登録（A01：患者入院（入院または登録））を表します。こちらも元記事の API に記載がありますが、そのためのパラメータである ADT_A01 も指定する必要があります。
+では早速実際に処理を行うソースコードを例示します。元記事のサンプルの文字列を利用したらデータ形式がやや異なっていたようなので、ソースコード内に注釈をつけました。利用するライブラリは以下です。
 - Hl7.Fhir.R4
 - Azure.Identity
 - Newtonsoft.Json
@@ -162,8 +166,4 @@ class Program
 
 ```
 
-これを実行すると以下の様になります。
-
-![](/images/azure-health-data-services-01/image06.png) 
-
-こちらもやっぱり日本語の記事を見かけなかったので、誰かの参考になれば幸いです。
+こちらもやっぱり日本語の記事を見かけなかったので作成してみました。誰かの参考になれば幸いです。
