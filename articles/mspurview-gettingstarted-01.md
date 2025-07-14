@@ -99,6 +99,8 @@ https://learn.microsoft.com/en-us/purview/data-map-data-sources
 ![](/images/mspurview-gettingstarted-01/purview-article-image20.png) 
 
 スキャンが正常に終わった後はどの様なデータに分類するかの操作が必要となります。今回は深堀しませんが、以下の様に Unified Catalog で様々な操作が可能であり、データスキャンの結果としていくつかの個人情報がラベル付されているのが分かると思います。
+![](/images/mspurview-gettingstarted-01/purview-article-image21.png) 
+
 
 次回以降では Unified Catalog でのデータ分類、データ操作に加え、データの共有等も紹介していきたいと思います。
 
