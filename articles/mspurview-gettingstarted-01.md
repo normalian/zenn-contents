@@ -17,7 +17,7 @@ Insider Risk management や Compliance Manager 等の機能を混ぜて解説す
 今回はスキャンのみですが、個人情報が含むデータの発見、自身で作成したルールで特定の情報検出する方法、検出したデータを共有する方法等は今回以外で別途紹介しようと思います。
 
 
-** Microsoft Purview アカウントの作成
+## Microsoft Purview アカウントの作成
 
 まずは Azure ポータルを開き、以下の様に Microsoft Purview アカウントを作成します。アカウント名とリージョンを選んで作成します。
 ![](/images/mspurview-gettingstarted-01/purview-article-image01.png) 
@@ -29,7 +29,7 @@ https://learn.microsoft.com/en-us/purview/legacy/create-microsoft-purview-portal
 ![](/images/mspurview-gettingstarted-01/purview-article-image02.png) 
 
 
-** Data Map で Azure Storage を追加する
+## Data Map で Azure Storage を追加する
 
 Microsoft Purview Governance ポータルの画面は以下の様になります。最初に tour 系のメッセージがでるので、必要の場合はそちらも閲覧してください。以下の画面左メニューでも最も使うのは Solution だと思います。こちらをクリックすると今回利用する Data Map も含め、10個程度のメニュー（というより、各項目がソリューションと言えるくらいのボリューム）が表示されます。
 
@@ -72,7 +72,8 @@ https://learn.microsoft.com/en-us/purview/data-map-data-sources
 対象として Managed Identity を選択し、Microsoft Purview アカウントの Managed Identity を選択します。
 ![](/images/mspurview-gettingstarted-01/purview-article-image13.png) 
 
-** Data Map から Azure Storage アカウントをスキャンする
+
+## Data Map から Azure Storage アカウントをスキャンする
 権限付与は完了しているので、先ほどと同様に以下の data sources 画面から以下のアイコンを押しスキャンを実施します。
 ![](/images/mspurview-gettingstarted-01/purview-article-image14.png) 
 
@@ -89,7 +90,7 @@ https://learn.microsoft.com/en-us/purview/data-map-data-sources
 ![](/images/mspurview-gettingstarted-01/purview-article-image18.png) 
 
 
-** スキャン結果を確認する
+## スキャン結果を確認する
 
 スキャンが開始されたので、次は以下の画面を参考に Monitoring メニューを表示します。実行結果のサマリが表示されていますが、さらに View details をクリックします。
 ![](/images/mspurview-gettingstarted-01/purview-article-image19.png) 
@@ -101,7 +102,8 @@ https://learn.microsoft.com/en-us/purview/data-map-data-sources
 
 次回以降では Unified Catalog でのデータ分類、データ操作に加え、データの共有等も紹介していきたいと思います。
 
-** References 
+
+## References 
 - https://learn.microsoft.com/en-us/purview/data-map-data-sources
 - https://learn.microsoft.com/en-us/purview/data-governance-roles-permissions
 - https://learn.microsoft.com/en-us/purview/legacy/create-microsoft-purview-portal
