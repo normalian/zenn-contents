@@ -2,7 +2,7 @@
 title: "Microsoft Purview の Data Map 機能を利用する"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Purview", "AI", "Security"]
+topics: ["microsoftpurview", "AI", "Security"]
 published: true
 publication_name: "microsoft"
 ---
