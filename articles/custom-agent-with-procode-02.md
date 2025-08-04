@@ -1,5 +1,5 @@
 ---
-title: "Azure Bot Service を Teams Channel で公開する場合、セキュリティはどう考えるべきか？"
+title: "Azure Bot Service を Teams Channel で公開する際、エンドポイント保護はどうしたらよいか？"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Teams", "AI", "SemanticKernel"]
@@ -13,7 +13,7 @@ publication_name: "microsoft"
 - [Develop Custom Engine Agent to Microsoft 365 Copilot Chat with pro-code](https://techcommunity.microsoft.com/blog/appsonazureblog/develop-custom-engine-agent-to-microsoft-365-copilot-chat-with-pro-code/4435612)
 - [カスタム エンジン エージェントを Microsoft 365 Copilot で公開する](https://ayuina.github.io/ainaba-csa-blog/fy26/mcs-custom-engine-agent/)
 
-上記の記事では C# 等の Pro code を使って Custom Engine Agent を公開できまることを解説しましたが、セキュリティの観点から各エンドポイントをどの様に保護したら良いかを考えてみたいと思います。
+上記の記事では C# 等の Pro code を使って Custom Engine Agent を公開できまることを解説しましたが、今回はセキュリティの観点から各エンドポイントをどの様に保護したら良いかを考えてみたいと思います。色んな思考実験をした結果で「これが良さそうだ」というところまではたどり着きましたが、これでセキュリティが担保可能かどうかはご自身の環境を含めて精査をお願い致します。
 
 ## どこのエンドポイントを制御できるのか？
 
@@ -438,4 +438,25 @@ BASE64 でエンコードされていますが、ChatGPT さんにでコード�
 
 ```
 
-以上のコードを実際の環境にデプロイして動かせば期待の挙動ができるはずです。皆様のご参考になれば幸いです。
+以上のコードを実際の環境にデプロイして動かせば期待の挙動ができるはずです。他の方に教えてもらいましたが、Tenant ID チェックには別の方法もありました。Bot/WeatherAgentBot.cs の MessageActivityAsync メソッド内でも以下の様に Tenant ID の取得が可能です。
+
+```csharp
+
+public class WeatherAgentBot : AgentApplication
+{
+    private WeatherForecastAgent _weatherAgent;
+    private Kernel _kernel;
+
+    protected async Task MessageActivityAsync(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
+    {
+        var tenantId = turnContext.Activity.Conversation.TenantId; // add code
+        // add validation of tenant ID here
+
+
+```
+
+こちらを以下のコードを参考にロジックを拡張しても良いはずです。
+https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/blob/dcf3b169084d3fff7c1e4c5b68718fb33c3391dd/Source/CompanyCommunicator/Bot/CompanyCommunicatorBotFilterMiddleware.cs#L44
+
+
+皆様のご参考になれば幸いです。
