@@ -7,7 +7,7 @@ published: true
 publication_name: "microsoft"
 ---
 
-** はじめに
+## はじめに
 
 今回は以下の記事を実施済なのが前提となっているので、どちらかの記事は必ず通読しておいてください。
 - [Develop Custom Engine Agent to Microsoft 365 Copilot Chat with pro-code](https://techcommunity.microsoft.com/blog/appsonazureblog/develop-custom-engine-agent-to-microsoft-365-copilot-chat-with-pro-code/4435612)
@@ -15,7 +15,7 @@ publication_name: "microsoft"
 
 上記の記事では C# 等の Pro code を使って Custom Engine Agent を公開できまることを解説しましたが、セキュリティの観点から各エンドポイントをどの様に保護したら良いかを考えてみたいと思います。
 
-** どこのエンドポイントを制御できるのか？
+## どこのエンドポイントを制御できるのか？
 
 今回の構成で気になるエンドポイントは以下の三つという認識です。
 - Teams のエンドポイント
@@ -34,7 +34,7 @@ https://learn.microsoft.com/en-us/azure/bot-service/dl-network-isolation-concept
 
 つまるところ、ネットワークレベルでの完全分離は厳しいということになります。こうなると ASP.NET Core 側で bearer header token を見ての制御が必要となりそうなので、C# コードを見ていきたいと思います。
 
-** ASP.NET Core アプリ側でのエンドポイント制御
+## ASP.NET Core アプリ側でのエンドポイント制御
 
 ではアプリケーションレベルでの制御はどうなっているのでしょうか？ ASP.NET Core のアプリ側にもどってテンプレートプロジェクトを眺めてみたいと思いますが、特に Program.cs に以下の記載があったことを覚えていますでしょうか？
 
