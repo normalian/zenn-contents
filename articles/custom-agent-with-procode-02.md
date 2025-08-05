@@ -28,11 +28,14 @@ Azure Bot Service のエンドポイントに関しては Teams Channel と ASP.
 一方で ASP.NET Core のエンドポイント側について考えてみましょう。Azure Bot Service 上の設定で ASP.NET Core のエンドポイントを公開しますが、これはインターネット上でパブリックなエンドポイントです。以下の様に network isolation 向けの記事も存在しますが、Azure Bot Service が DirectLine の場合にのみ利用可能であり、Teams Channel の場合は利用できません。
 https://learn.microsoft.com/en-us/azure/bot-service/dl-network-isolation-concept?view=azure-bot-service-4.0
 
-その他の記事も確認してみましょう。以下の記事は両方とも同じことを解説してくれていますが、ポイントとしては「Teams 自体が SaaS アプリケーションなので、Teams 経由でアクセスする Bot のエンドポイント（例：https://my-webapp-endpoint.net/api/messages）は公開されている必要がある」と述べています。
+その他の記事も確認してみましょう。以下の記事は両方とも同じことを解説してくれていますが、ポイントとしては「Teams 自体が SaaS アプリケーションなので、Teams 経由でアクセスする Bot のエンドポイント（例：https://my-webapp-endpoint.net/api/messages ）は公開されている必要がある」と述べています。
 - https://learn.microsoft.com/en-us/answers/questions/2263616/is-it-possible-to-integrate-azure-bot-with-teams-w
 - https://learn.microsoft.com/en-us/answers/questions/2153606/how-to-create-azure-bot-service-in-a-private-netwo
 
-つまるところ、ネットワークレベルでの完全分離は厳しいということになります。こうなると ASP.NET Core 側で bearer header token を見ての制御が必要となりそうなので、C# コードを見ていきたいと思います。
+特に以下の記事では相当詳細に Teams <--> Azure Bot Service 間のトラフィックの流れが解説されています。当該記事の「Challenge 2: Network isolation vs. Teams connectivity」に明記されている通り、Azure Firewall や NSG の利用に加え、JWT token の検証が良さそうだということが分かります。
+- https://moimhossain.com/2025/05/22/azure-bot-service-microsoft-teams-architecture-and-message-flow/?utm_source=chatgpt.com
+
+つまるところ、Teams Channel を利用する場合はネットワークレベルでの完全分離は厳しいということになります（ Teams 自体が SaaS なので、言われてみれば当たり前ですが ）。従って上記の通り ASP.NET Core 側で JWT token を見ての制御が必要となりそうなので、C# コードを見ていきたいと思います。
 
 ## ASP.NET Core アプリ側でのエンドポイント制御
 
@@ -482,7 +485,7 @@ public class WeatherAgentBot : AgentApplication
 
     protected async Task MessageActivityAsync(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        // addd validation of tenant ID
+        // add validation of tenant ID
         var activity = turnContext.Activity;
         // ログ: 受信したアクティビティ
         _logger.LogInformation("Received message activity from: {FromId}, AadObjectId:{AadObjectId}, TenantId: {TenantId}, ChannelId: {ChannelId}, ConversationType: {ConversationType}",
