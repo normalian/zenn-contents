@@ -438,25 +438,130 @@ BASE64 でエンコードされていますが、ChatGPT さんにでコード�
 
 ```
 
-以上のコードを実際の環境にデプロイして動かせば期待の挙動ができるはずです。他の方に教えてもらいましたが、Tenant ID チェックには別の方法もありました。Bot/WeatherAgentBot.cs の MessageActivityAsync メソッド内でも以下の様に Tenant ID の取得が可能です。
+以上のコードを実際の環境にデプロイして動かせば期待の挙動ができるはずです。
+
+### 8月5日追記 - Tenant ID チェック方式
+他の方に教えてもらいましたが、Tenant ID チェックには別の方法もありました。Bot/WeatherAgentBot.cs の MessageActivityAsync メソッド内でも Tenant ID の取得が可能です。こちらを以下のコードを参考にロジックを拡張してみましょう。
+https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/blob/dcf3b169084d3fff7c1e4c5b68718fb33c3391dd/Source/CompanyCommunicator/Bot/CompanyCommunicatorBotFilterMiddleware.cs#L44
+
+例としては以下になります。
 
 ```csharp
+
+using MyM365Agent1.Bot.Agents;
+using Microsoft.Agents.Builder;
+using Microsoft.Agents.Builder.App;
+using Microsoft.Agents.Builder.State;
+using Microsoft.Agents.Core.Models;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+
+namespace MyM365Agent1.Bot;
 
 public class WeatherAgentBot : AgentApplication
 {
     private WeatherForecastAgent _weatherAgent;
     private Kernel _kernel;
+    private readonly string _tenantId;
+
+    public WeatherAgentBot(AgentApplicationOptions options, Kernel kernel, IConfiguration configuration) : base(options)
+    {
+        _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+
+        OnConversationUpdate(ConversationUpdateEvents.MembersAdded, WelcomeMessageAsync);
+        OnActivity(ActivityTypes.Message, MessageActivityAsync, rank: RouteRank.Last);
+
+        // TokenValidation セクションから TenantId を取得
+        var tokenValidationSection = configuration.GetSection("TokenValidation");
+        _tenantId = tokenValidationSection["TenantId"];
+    }
 
     protected async Task MessageActivityAsync(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        var tenantId = turnContext.Activity.Conversation.TenantId; // add code
-        // add validation of tenant ID here
+        // addd validation of tenant ID
+        var activity = turnContext.Activity;
 
+        // CompanyCommunicatorBotFilterMiddleware のフィルタロジックを再現
+        if (activity.ChannelId != "msteams")
+        {
+            // Teams 以外からのメッセージは無視 TODO: logging
+            return;
+        }
+
+        if (activity.Conversation?.ConversationType?.ToLowerInvariant() != "personal")
+        {
+            // チームチャネルやグループチャットからのメッセージは無視 TODO: logging
+            return;
+        }
+
+        if (string.IsNullOrEmpty(activity.From?.AadObjectId))
+        {
+            // AAD ユーザーでない（ボット、ゲストユーザーなど）は無視 TODO: logging
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(_tenantId) && !string.Equals(activity.Conversation?.TenantId, _tenantId, StringComparison.OrdinalIgnoreCase))
+        {
+            // TenantId バリデーション（設定と一致しない場合は無視） TODO: logging
+            return;
+        }
+
+        // Setup local service connection
+        ServiceCollection serviceCollection = [
+            new ServiceDescriptor(typeof(ITurnState), turnState),
+            new ServiceDescriptor(typeof(ITurnContext), turnContext),
+            new ServiceDescriptor(typeof(Kernel), _kernel),
+        ];
+
+        // Start a Streaming Process 
+        await turnContext.StreamingResponse.QueueInformativeUpdateAsync("Working on a response for you");
+
+        ChatHistory chatHistory = turnState.GetValue("conversation.chatHistory", () => new ChatHistory());
+        _weatherAgent = new WeatherForecastAgent(_kernel, serviceCollection.BuildServiceProvider());
+
+        // Invoke the WeatherForecastAgent to process the message
+        WeatherForecastAgentResponse forecastResponse = await _weatherAgent.InvokeAgentAsync(turnContext.Activity.Text, chatHistory);
+        if (forecastResponse == null)
+        {
+            turnContext.StreamingResponse.QueueTextChunk("Sorry, I couldn't get the weather forecast at the moment.");
+            await turnContext.StreamingResponse.EndStreamAsync(cancellationToken);
+            return;
+        }
+
+        // Create a response message based on the response content type from the WeatherForecastAgent
+        // Send the response message back to the user. 
+        switch (forecastResponse.ContentType)
+        {
+            case WeatherForecastAgentResponseContentType.Text:
+                turnContext.StreamingResponse.QueueTextChunk(forecastResponse.Content);
+                break;
+            case WeatherForecastAgentResponseContentType.AdaptiveCard:
+                turnContext.StreamingResponse.FinalMessage = MessageFactory.Attachment(new Attachment()
+                {
+                    ContentType = "application/vnd.microsoft.card.adaptive",
+                    Content = forecastResponse.Content,
+                });
+                break;
+            default:
+                break;
+        }
+        await turnContext.StreamingResponse.EndStreamAsync(cancellationToken); // End the streaming response
+    }
+
+    protected async Task WelcomeMessageAsync(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
+    {
+        foreach (ChannelAccount member in turnContext.Activity.MembersAdded)
+        {
+            if (member.Id != turnContext.Activity.Recipient.Id)
+            {
+                await turnContext.SendActivityAsync(MessageFactory.Text("Hello and Welcome! I'm here to help with all your weather forecast needs!"), cancellationToken);
+            }
+        }
+    }
+}
 
 ```
 
-こちらを以下のコードを参考にロジックを拡張しても良いはずです。
-https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/blob/dcf3b169084d3fff7c1e4c5b68718fb33c3391dd/Source/CompanyCommunicator/Bot/CompanyCommunicatorBotFilterMiddleware.cs#L44
-
-
-皆様のご参考になれば幸いです。
+せっかくなのでいろんなバリデーションも追記しておきました。皆様のご参考になれば幸いです。
