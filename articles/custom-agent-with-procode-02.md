@@ -465,10 +465,12 @@ public class WeatherAgentBot : AgentApplication
     private WeatherForecastAgent _weatherAgent;
     private Kernel _kernel;
     private readonly string _tenantId;
+    private readonly ILogger<WeatherAgentBot> _logger;
 
-    public WeatherAgentBot(AgentApplicationOptions options, Kernel kernel, IConfiguration configuration) : base(options)
+    public WeatherAgentBot(AgentApplicationOptions options, Kernel kernel, IConfiguration configuration, ILogger<WeatherAgentBot> logger) : base(options)
     {
         _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         OnConversationUpdate(ConversationUpdateEvents.MembersAdded, WelcomeMessageAsync);
         OnActivity(ActivityTypes.Message, MessageActivityAsync, rank: RouteRank.Last);
@@ -482,29 +484,19 @@ public class WeatherAgentBot : AgentApplication
     {
         // addd validation of tenant ID
         var activity = turnContext.Activity;
+        // ログ: 受信したアクティビティ
+        _logger.LogInformation("Received message activity from: {FromId}, AadObjectId:{AadObjectId}, TenantId: {TenantId}, ChannelId: {ChannelId}, ConversationType: {ConversationType}",
+            activity?.From?.Id, activity?.From?.AadObjectId, activity?.Conversation?.TenantId, activity?.ChannelId, activity?.Conversation?.ConversationType);
 
-        // CompanyCommunicatorBotFilterMiddleware のフィルタロジックを再現
-        if (activity.ChannelId != "msteams")
+        if (activity.ChannelId != "msteams"                                                 // Teams 以外からのメッセージは無視
+            || activity.Conversation?.ConversationType?.ToLowerInvariant() != "personal"    // チームチャネルやグループチャットからのメッセージは無視
+            || string.IsNullOrEmpty(activity.From?.AadObjectId)                             // AAD ユーザーでない（ボット、ゲストユーザーなど）は無視
+            || (!string.IsNullOrEmpty(_tenantId) && !string.Equals(activity.Conversation?.TenantId, _tenantId, StringComparison.OrdinalIgnoreCase)))
         {
-            // Teams 以外からのメッセージは無視 TODO: logging
-            return;
-        }
+            _logger.LogWarning("Unauthorized serviceUrl detected: {ServiceUrl}. Expected to contain TenantId: {TenantId}",
+                activity?.ServiceUrl, _tenantId);
 
-        if (activity.Conversation?.ConversationType?.ToLowerInvariant() != "personal")
-        {
-            // チームチャネルやグループチャットからのメッセージは無視 TODO: logging
-            return;
-        }
-
-        if (string.IsNullOrEmpty(activity.From?.AadObjectId))
-        {
-            // AAD ユーザーでない（ボット、ゲストユーザーなど）は無視 TODO: logging
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(_tenantId) && !string.Equals(activity.Conversation?.TenantId, _tenantId, StringComparison.OrdinalIgnoreCase))
-        {
-            // TenantId バリデーション（設定と一致しない場合は無視） TODO: logging
+            await turnContext.SendActivityAsync("Unauthorized service URL.", cancellationToken: cancellationToken);
             return;
         }
 
