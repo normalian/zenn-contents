@@ -46,25 +46,25 @@ graph TB
 https://www.nuget.org/packages/microsoft.agents.copilotstudio.client/
 
 主に以下二つの設定が必要になります。Entra ID 側でのアプリケーション登録と権限設定、Copilot Studio 側でのカスタムエージェントを作成・公開しての構成情報取得という流れです。
-    - Entra ID 側に app registration を新規に作成し、CopilotStudio.Copilot.Invoke API Application Permission を割り当てる
-    - CopilotStudio 側でカスタムエージェントを作成し、publish して公開利用可能にする
+
+- Entra ID 側に app registration を新規に作成し、CopilotStudio.Copilot.Invoke API Application Permission を割り当てる
+- CopilotStudio 側でカスタムエージェントを作成し、publish して公開利用可能にする
 
 
 ## Entra ID 側に app registration を新規に作成して CopilotStudio.Copilot.Invoke API Application Permission を割り当て
 
 まず Entra ID 側での設定ですが、作成したサービスプリンシパルのメニューから以下を行います。
 
-1. API Permissions を選択する
-2. Add Permission を選択する
- - サイドパネルが現れるので、API's my organization uses タブを選択する
- - "Power Platform API" と検索（もし表示されない場合は以下の手順を行ってください）
- - アプリケーションのパーミッションとしては "Application Permissions" を選んでください
- - ![](/images/agentframework-copilotstudio-01/api-permission-02.png) 
- - パーミッションリストから CopilotStudio を選び CopilotStudio.Copilots.Invoke にチェックする
- - ![](/images/agentframework-copilotstudio-01/api-permission-03.png) 
- - Grant admin consentを実行する
+- API Permissions を選択する
+- Add Permission を選択する
+- サイドパネルが現れるので、API's my organization uses タブを選択する
+- "Power Platform API" と検索（もし表示されない場合は以下の手順を行ってください）
+- アプリケーションのパーミッションとしては "Application Permissions" を選んでください ![](/images/agentframework-copilotstudio-01/api-permission-02.png) 
+- パーミッションリストから CopilotStudio を選び CopilotStudio.Copilots.Invoke にチェックする ![](/images/agentframework-copilotstudio-01/api-permission-03.png) 
+- Grant admin consentを実行する
 
 上記のステップを行う際、APIs my organization uses タブで Power Platform API を検索しても見つからない場合、以下の記事を参照してください。
+
 https://learn.microsoft.com/en-us/power-platform/admin/programmability-authentication-v2?tabs=azcli#step-2-configure-api-permissions
 
 以下のコマンドを実行する必要があります。どうやらデフォルトでは有効化されていないようなので、コマンド実行が必要になります。
