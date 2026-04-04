@@ -4,6 +4,7 @@ emoji: "🐈"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["MCP", "AI", "Security"]
 published: true
+publication_name: "microsoft"
 ---
 
 # はじめに
@@ -114,7 +115,7 @@ class Program
 }
 ```
 
-# Visual Studio Code 上から呼び出す。
+# Visual Studio Code 上から呼び出す
 
 以下の設定ファイルを .vscode/mcp.json として配置し、Visual Studio Code を起動し、設定した MCP サーバへ接続します。接続時は popup windows が表示されるので、認証情報を入力してください。 
 
