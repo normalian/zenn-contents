@@ -4,15 +4,16 @@ emoji: "🐈"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Agent365", "AI", "GCP"]
 published: true
+publication_name: "microsoft"
 ---
 
 # はじめに
 
 ## GCP 上での Agent365 エージェント実行（Cross‑Cloud Runtime 構成）
 
-前章では Azure App Service 上にエージェントをホストする構成について説明しましたが、Agent365 はエージェントの「実行環境（Runtime）」ではなく Microsoft Entra ID を基盤とした「Control Plane」として動作します。
+前回の記事で[Agent365 CLI を利用したエージェント開発](https://zenn.dev/microsoft/articles/a365cli-agentdevelopment-01) Agent365 Cli を利用して pro-code でのエージェント公開までを試しました。実態のアプリケーションを配置した場所は Azure App Service 上であり、Microsoft Platform に閉じていました。
 
-そのため、エージェント本体は Azure 上にホストする必要はなく HTTPS で到達可能な `/api/messages` エンドポイントを公開できる環境であれば、Google Cloud Run や Kubernetes（GKE）など任意のクラウド環境上でホストすることが可能です。Agent365 の Development Lifecycle においても、エージェントコードは Azure 以外のクラウドサービス上でホスト可能であることが以下に明記されています。
+一方で、前記事でも説明した通り Agent365 はエージェントの「実行環境（Runtime）」ではなく Microsoft Entra ID を基盤とした「Control Plane」として動作します。そのため、エージェント本体は Azure 上にホストする必要はなく HTTPS で到達可能な `/api/messages` エンドポイントを公開できる環境であれば、Google Cloud Run や Kubernetes（GKE）など任意のクラウド環境上でホストすることが可能です。Agent365 の Development Lifecycle においても、エージェントコードは Azure 以外のクラウドサービス上でホスト可能であることが以下に明記されています。
 
 https://learn.microsoft.com/en-us/microsoft-agent-365/developer/a365-dev-lifecycle
 
@@ -48,7 +49,7 @@ graph TD
     CP -. "messagingEndpoint" .-> EP
 ```
 
-# ハンズオン：GCP Cloud Run でのエージェント構築
+# ハンズオン：GCP Cloud Run を利用したエージェント構築
 
 ここからは、実際に Google Cloud Run 上に Agent365 エージェントをデプロイし、Microsoft Teams から利用できるようになるまでの手順をステップバイステップで解説します。
 
@@ -82,7 +83,7 @@ gcloud config set run/region us-central1   # 任意のリージョン
 
 ## Step 1：プロジェクトの作成
 
-まず、Node.js プロジェクトを作成し必要なパッケージをインストールします。
+まず Node.js プロジェクトを作成し必要なパッケージをインストールします。
 
 ```bash
 mkdir gcp-a365-agent
@@ -119,11 +120,10 @@ npm install express @microsoft/agents-hosting dotenv
 ```
 
 :::message
-`npm init -y` のデフォルトでは `start` スクリプトが未定義の場合があります。Cloud Run は `Dockerfile` がない場合 [Google Cloud Buildpacks](https://cloud.google.com/docs/buildpacks/overview) を使用し、`npm start` でプロセスを起動します。`"start": "node index.js"` が設定されていないとコンテナ起動時に失敗するため、必ず確認してください。
+`npm init -y` のデフォルトでは `start` スクリプトが未定義の場合があります。Cloud Run は `Dockerfile` がない場合 [Google Cloud Buildpacks](https://cloud.google.com/docs/buildpacks/overview) を使用し、`npm start` でプロセスを起動します。`"start": "node index.js"` が設定されていないとコンテナ起動時に失敗するため、必ず確認してください。私はハマりました。
 :::
 
-
-## Step 2：エージェントコードの実装
+## Step 2：エージェントの実装
 
 プロジェクトルートに index.js を作成します。
 
@@ -202,7 +202,7 @@ server.listen(port, () => console.log(`Agent listening on port ${port}`));
 const authConfig = loadAuthConfigFromEnv();
 ```
 
-`loadAuthConfigFromEnv()` は環境変数から `clientId`、`clientSecret`、`tenantId` の 3 つを読み込みます。これらは後続の Step で Agent365 CLI で実行される情報、Entra ID テナント情報から .env ファイルを作成・追記します。
+`loadAuthConfigFromEnv()` は環境変数から `clientId`、`clientSecret`、`tenantId` の 3 つを読み込みます。これらは後続の Step で Agent365 CLI を実行する際に出力される情報、Entra ID テナントの Service Principal 情報から .env ファイルを作成・追記します。
 
 **2. JWT 検証ミドルウェア**
 
@@ -210,7 +210,7 @@ const authConfig = loadAuthConfigFromEnv();
 server.post('/api/messages', authorizeJWT(authConfig), (req, res) => {
 ```
 
-`/api/messages` エンドポイントには `authorizeJWT(authConfig)` ミドルウェアが適用されています。Bot Framework Service は `botframework.com` の署名付き Bearer Token を送信するため、**エージェントが GCP 上にホストされていても JWT 検証は必須**です。Control Plane は常に Microsoft 側にあるためです。
+`/api/messages` エンドポイントには `authorizeJWT(authConfig)` ミドルウェアが適用されています。Agent365 Cli で内部的に作成される Bot Framework Service は `botframework.com` の署名付き Bearer Token を送信するため、**エージェントが GCP 上にホストされていても JWT 検証は必須**です。Control Plane 自体は常に Microsoft 側にあるためです。
 
 **3. agentLifecycle ハンドラー**
 
@@ -391,7 +391,24 @@ agenticUserTemplateManifest.json では通信プロトコルとして `activityP
 }
 ```
 
-## Step 7：動作確認
+作成した manifest.zip を Microsoft Admin Portal にアップロードしてエージェントを登録してください。
+
+## Step 7: Teams Developer Portal でのエンドポイント登録
+
+前回恩記事でも行いましたが、エージェントが受け取るメッセージのアプリケーションのエンドポイントを Teams Dev Center から登録します。まずエンドポイントを確認するためにコマンドを実行します。
+
+```bash
+a365 config display -g
+```
+
+![](/images/a365cli-agentdevelopment-01/teams-devcenter-01.png) 
+
+表示されている /api/messages の URL を保存し、Teams Developer Portal https://dev.teams.microsoft.com/home を開きます。Tools の中から自身の Agent Blueprint を選択し、以下の Configuration から Agent Type を API Based に選択後、Notification URL に保存した URL を入力して保存してください。
+
+![](/images/a365cli-agentdevelopment-01/teams-devcenter-02.png) 
+
+
+## Step 8：動作確認
 
 ### Cloud Run の疎通確認
 
