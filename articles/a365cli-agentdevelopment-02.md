@@ -312,7 +312,6 @@ flowchart LR
     A --> C["Agent Identity<br/>(Service Principal)"]
     A --> D["Agent User<br/>(Entra ID User)"]
     A --> E["API Permissions<br/>(Graph / MCP / Bot API)"]
-    A --> F[".env ファイル生成"]
 ```
 
 セットアップ完了後、以下が自動的に行われます。
