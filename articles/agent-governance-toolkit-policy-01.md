@@ -11,7 +11,7 @@ publication_name: "microsoft"
 
 AIエージェントが自律的にツールを呼び出す時代になりました。ファイルを読み書きし、APIを叩き、データベースを参照する——便利な反面、**誰が・何を・どんな条件で呼び出してよいか**を制御する仕組みがなければ、本番環境には置けません。
 
-2026年4月にMicrosoftがオープンソースとして公開した **Agent Governance Toolkit（AGT）** は、まさにその「門番」をAIエージェントに組み込むためのツールキットです。
+Microsoftがオープンソースとして公開した **Agent Governance Toolkit（AGT）** は、まさにその「門番」をAIエージェントに組み込むためのツールキットです。
 
 この記事では、以下のサンプルリポジトリをベースに、.NET（C#）での AGT 入門を解説します。
 
@@ -23,7 +23,7 @@ https://github.com/normalian/MyAGTSamples
 
 AGT は **AIエージェントのランタイムセキュリティ**を実現するオープンソースプロジェクトです（MIT ライセンス）。
 
-主な機能は次のとおりです（他にもいくつもありあｍす）。
+主な機能は次のとおりです（他にもいくつもあります）。
 
 - **Policy Engine** — YAML/JSON で記述したルールをもとにツール呼び出しを allow/deny する
 - **実行リング** — エージェントの信頼スコアに応じて権限を段階的に制限する
@@ -82,15 +82,9 @@ name: default-governance-policy
 default_action: deny
 
 rules:
-  # allowed_tools に含まれるツールは許可
-  - name: allow-safe-tools
-    condition: "tool_name in allowed_tools"
-    action: allow
-    priority: 10
-
-  # blocked_tools に含まれるツールは拒否
-  - name: block-dangerous-tools
-    condition: "tool_name in blocked_tools"
+  # file_write は危険なため拒否
+  - name: block-file-write
+    condition: "tool_name == 'file_write'"
     action: deny
     priority: 100
 
@@ -99,9 +93,17 @@ rules:
     condition: "tool_name == 'http_request'"
     action: rate_limit
     limit: "100/minute"
+
+  # file_read は許可
+  - name: allow-file-read
+    condition: "tool_name == 'file_read'"
+    action: allow
+    priority: 10
 ```
 
 ポイントは `default_action: deny` です。**明示的に許可されていないツールはすべてブロック**される、ホワイトリスト方式です。
+
+ルールの条件式は `"tool_name == 'ツール名'"` という形式で記述します。`==` による完全一致が基本構文で、AGT が実行時に MAF の function 名をそのまま `tool_name` として評価します。
 
 ### Program.cs — ポリシー評価の基本
 
@@ -142,13 +144,13 @@ Console.WriteLine("✅ Allowed — proceeding with tool execution");
 dotnet run --project AGTPolicyApp01/AGTPolicyApp01.csproj
 ```
 
-`file_write` は `allowed_tools` に含まれていないため、デフォルトポリシーに従ってブロックされます。
+`file_write` はポリシーで明示的に deny されているため、ブロックされます。
 
 ```
-❌ Blocked: tool 'file_write' not in allowed_tools (default_action: deny)
+❌ Blocked: tool 'file_write' is explicitly denied by rule 'block-file-write'
 ```
 
-`file_read` などを `allowed_tools` に追加すれば許可できます。このように、**エージェントを実行する前にポリシーを評価してから**ツールを呼び出す、というパターンが AGT の基本です。
+このように、**エージェントを実行する前にポリシーを評価してから**ツールを呼び出す、というパターンが AGT の基本です。
 
 ---
 
@@ -176,6 +178,28 @@ export AZURE_OPENAI_DEPLOYMENT_NAME="gpt-4.1-mini"
 ```
 
 認証は `AzureCliCredential` を使うため、`az login` 済みであれば追加設定不要です。
+
+### ポリシーファイル
+
+`policies/default.yaml` を以下の内容で作成します。
+
+```yaml
+apiVersion: governance.toolkit/v1
+version: "1.0"
+name: default-governance-policy
+
+# デフォルトは deny（明示的に許可されていないものはすべて拒否）
+default_action: deny
+
+rules:
+  # GetWeather ツールは拒否
+  - name: block-get-weather
+    condition: "tool_name == 'GetWeather'"
+    action: deny
+    priority: 100
+```
+
+条件式の `tool_name` には、C# 側で `AIFunctionFactory.Create()` に渡した `name` パラメータの値がそのまま使われます。**大文字小文字も含めて完全一致**している必要があります。
 
 ### Program.cs — MAF エージェントへのガバナンス統合
 
@@ -274,16 +298,19 @@ namespace AGTPolicyWithMAFApp02
 dotnet run --project AGTPolicyWithMAFApp02/AGTPolicyWithMAFApp02.csproj
 ```
 
-`GetWeather` が `allowed_tools` に含まれていなければ、ポリシーに従ってブロックされます。
+`GetWeather` がポリシーで deny されているため、ツール呼び出しがブロックされます。
 
 ```
-[Governance Event] Type: ToolCallEvaluated, Tool: default-governance-policy, Agent: myagent
-[BLOCKED TOOL] default-governance-policy: tool 'GetWeather' not in allowed_tools
-Agent response1: 'myagent' was blocked for tool calling
-Agent response2: I am an AI assistant. How can I help you?
+[Governance Event] Type: PolicyCheck, Tool: , Agent: did:agentmesh:myagent
+[Governance Event] Type: ToolCallBlocked, Tool: deny-weather-tools, Agent: did:agentmesh:myagent
+[Governance Event] Type: PolicyViolation, Tool: deny-weather-tools, Agent: did:agentmesh:myagent
+[BLOCKED TOOL] deny-weather-tools: Matched rule 'deny-weather-tools' with action 'Deny'.
+Agent response1:
+[Governance Event] Type: PolicyCheck, Tool: , Agent: did:agentmesh:myagent
+Agent response2: I am an AI language model created to assist you with information, answer questions, and perform various tasks. How can I help you today?
 ```
 
-ポリシーに `GetWeather` を追加すれば、ツール呼び出しが許可されて天気情報が返ります。
+`GetWeather` を許可したい場合は、該当ルールの `action` を `allow` に変えるか、ルールごと削除するだけです。
 
 ---
 
@@ -330,23 +357,38 @@ agent.WithGovernance(kernel, new AgentFrameworkGovernanceOptions
 
 `.WithGovernance()` は MAF エージェントのツール呼び出しパイプラインに自動で割り込みます。エージェントコードを書き換えることなく、後からガバナンスを追加できるのが大きな利点です。
 
-### ④ ポリシーで挙動をコントロール
+### ④ ポリシーの条件式の書き方
 
-`GetWeather` を許可したい場合は、ポリシーの `allowed_tools` に追加するだけです。
+AGT の条件式は `"tool_name == 'ツール名'"` という形式で記述します。`tool_name` に入る値は、C# 側で登録した function 名と**大文字小文字を含めて完全一致**している必要があります。
+
+```csharp
+// C# 側の登録
+AIFunctionFactory.Create(GetWeather, name: "GetWeather")
+//                                         ↑ この文字列が tool_name になる
+```
+
+```yaml
+# YAML 側の条件式
+condition: "tool_name == 'GetWeather'"
+#                          ↑ C# 側と完全一致させる
+```
+
+複数のツールをブロックしたい場合は、ルールを並べて記述します。
 
 ```yaml
 rules:
-  - name: allow-safe-tools
-    condition: "tool_name in allowed_tools"
-    action: allow
-    priority: 10
+  - name: block-get-weather
+    condition: "tool_name == 'GetWeather'"
+    action: deny
+    priority: 100
 
-allowed_tools:
-  - GetWeather   # ← これを追加するだけでツールが使えるようになる
-  - file_read
+  - name: block-execute-code
+    condition: "tool_name == 'execute_code'"
+    action: deny
+    priority: 100
 ```
 
-コードを変更せず、YAMLだけで制御が変わります。これが「ポリシー駆動のガバナンス」の本質です。
+コードを変更せず、YAML だけで制御が変わります。これが「ポリシー駆動のガバナンス」の本質です。
 
 ---
 
@@ -356,7 +398,7 @@ AGT は OWASP Agentic AI Top 10 に対応しています。本サンプルで体
 
 | リスク | AGT の対応 | 本記事での該当箇所 |
 |---|---|---|
-| ツールの悪用 | ホワイトリストポリシーによるブロック | `default_action: deny` |
+| ツールの悪用 | 条件式による明示的なブロック | `condition: "tool_name == '...'"` |
 | プロンプトインジェクション | 入力のスキャンと検知 | `EnablePromptInjectionDetection` |
 | 過剰な呼び出し | レート制限 | `limit: "100/minute"` |
 | 不正なエージェント | DIDベースID + 信頼スコア | `agentId` パラメータ |
@@ -367,7 +409,7 @@ AGT は OWASP Agentic AI Top 10 に対応しています。本サンプルで体
 
 Agent Governance Toolkit を使うと、AIエージェントへのガバナンス追加は非常にシンプルです。
 
-1. **ポリシーYAMLを書く** — `default_action: deny` から始めて、許可するものだけ列挙する
+1. **ポリシーYAMLを書く** — `condition: "tool_name == 'ツール名'"` の形式でルールを記述する
 2. **`GovernanceKernel` を初期化する** — オプションで必要な機能を有効化する
 3. **`.WithGovernance()` でエージェントに注入する** — エージェントコードは触らなくてよい
 
@@ -385,3 +427,4 @@ https://github.com/normalian/MyAGTSamples
 - [Introducing the Agent Governance Toolkit（Microsoft Open Source Blog）](https://opensource.microsoft.com/blog/2026/04/02/introducing-the-agent-governance-toolkit-open-source-runtime-security-for-ai-agents/)
 - [Governing MCP tool calls in .NET with the AGT（.NET Blog）](https://devblogs.microsoft.com/dotnet/governing-mcp-tool-calls-in-dotnet-with-the-agent-governance-toolkit/)
 - [Tutorial 19 — .NET SDK（公式チュートリアル）](https://github.com/microsoft/agent-governance-toolkit/blob/main/docs/tutorials/19-dotnet-sdk.md)
+- [Tutorial 43 — .NET MAF Hook Integration（公式チュートリアル）](https://microsoft.github.io/agent-governance-toolkit/tutorials/43-dotnet-maf-hook-integration/)
