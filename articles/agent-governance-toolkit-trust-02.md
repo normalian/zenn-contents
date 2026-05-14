@@ -37,7 +37,7 @@ Agent Trust は以下の機能を提供します：
 | プロジェクト | 説明 |
 |-------------|------|
 | AGTIdentityApp01 | Agent Identity の基本的な使い方 |
-| AGTIdentityWithMAFApp02 | MAF（Microsoft AI Framework）との統合と信頼スコアベースのアクセス制御 |
+| AGTIdentityWithMAFApp02 | MAF（Microsoft Agent Framework）との統合と信頼スコアベースのアクセス制御 |
 
 サンプルコードは以下のリポジトリで公開しています：
 https://github.com/normalian/MyAGTSamples
@@ -112,7 +112,7 @@ Medium
 
 ## サンプル2: MAF 統合と信頼スコアベースのアクセス制御（AGTIdentityWithMAFApp02）
 
-より実践的なサンプルとして、Microsoft AI Framework（MAF）と AGT を統合し、信頼スコアに基づいてツール実行を制御する例を紹介します。
+より実践的なサンプルとして、Microsoft Agent Framework（MAF）と AGT を統合し、信頼スコアに基づいてツール実行を制御する例を紹介します。
 
 ### プロジェクト構成
 
@@ -588,7 +588,7 @@ Agent Governance Toolkit の Agent Trust 機能を使うことで：
 1. **エージェントの一意識別**: DID によりエージェントを追跡可能
 2. **動的な信頼管理**: 行動に基づいて信頼スコアを調整
 3. **段階的なアクセス制御**: Ring レベルに基づいた柔軟な権限管理
-4. **MAF との統合**: Microsoft AI Framework とシームレスに連携
+4. **MAF との統合**: Microsoft Agent Framework とシームレスに連携
 
 AI エージェントが自律的に動作する環境では、「信頼できるエージェントにのみ重要な操作を許可する」という考え方が重要です。Agent Trust を活用することで、安全かつ柔軟なエージェントガバナンスを実現できます。
 
