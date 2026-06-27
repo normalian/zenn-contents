@@ -4,6 +4,7 @@ emoji: "🧠"
 type: tech
 topics: [dotnet, ai, azure, agent]
 published: true
+publication_name: "microsoft"
 ---
 
 ## はじめに
