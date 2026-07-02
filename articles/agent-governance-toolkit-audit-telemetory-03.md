@@ -1,5 +1,5 @@
 ---
-title: "Agent Governance Toolkit の監査とテレメトリ - 本番環境への道 - .NET 9 での実装入門"
+title: "Agent Governance Toolkit の監査とテレメトリ - 本番環境への道 - .NET での実装入門"
 emoji: "🔐"
 type: "tech"
 topics: ["azure", "dotnet", "ai", "agent", "security"]
@@ -7,7 +7,7 @@ published: true
 publication_name: "microsoft"
 ---
 
-# Agent Governance Toolkit の監査とテレメトリ - 本番環境への道 - .NET 9 での実装入門
+# Agent Governance Toolkit の監査とテレメトリ - 本番環境への道 - .NET での実装入門
 
 ## はじめに
 
