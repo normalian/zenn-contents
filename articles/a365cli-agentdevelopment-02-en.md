@@ -1,5 +1,5 @@
 ---
-title: "Building an Copilot Agent with Agent365 CLI: GCP Edition"
+title: "Building a Copilot Agent with Agent365 CLI: GCP Edition"
 emoji: "🐈"
 type: "tech" # tech: technical article / idea: idea
 topics: ["Agent365", "AI", "GCP"]
