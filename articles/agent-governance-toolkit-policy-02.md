@@ -1,5 +1,5 @@
 ---
-title: "ファイル操作エージェントに「読み取り専用」の境界線を引く — Agent Framework Harness と Agent Governance Toolkit"
+title: "ファイル操作エージェントの決定論的制御 — Agent Framework Harness と Agent Governance Toolkit"
 emoji: "🛡️"
 type: "tech"
 topics: ["dotnet", "azure", "ai", "agentgovernancetoolkit", "microsoft"]
