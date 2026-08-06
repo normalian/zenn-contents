@@ -4,6 +4,7 @@ emoji: "🛡️"
 type: "tech"
 topics: ["dotnet", "azure", "ai", "agentgovernancetoolkit", "microsoft"]
 published: true
+publication_name: "microsoft"
 ---
 
 ## はじめに
