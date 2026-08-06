@@ -3,7 +3,7 @@ title: "Agent Framework Harness と Agent Governance Toolkit でファイル操�
 emoji: "🛡️"
 type: "tech"
 topics: ["dotnet", "azure", "ai", "agentgovernancetoolkit", "microsoft"]
-published: false
+published: true
 ---
 
 ## はじめに
