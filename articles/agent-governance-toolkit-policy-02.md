@@ -1,5 +1,5 @@
 ---
-title: "ファイル操作エージェントの決定論的制御 — Agent Framework Harness と Agent Governance Toolkit"
+title: "Agent Framework Harness と Agent Governance Toolkit でファイル操作エージェント制御"
 emoji: "🛡️"
 type: "tech"
 topics: ["dotnet", "azure", "ai", "agentgovernancetoolkit", "microsoft"]
