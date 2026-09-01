@@ -21,27 +21,27 @@ Azure Virtual Machine の offer type に関しては「F5 の様なネットワ�
 Azure Application は語りだすと止まらなくなりそうなので話題を避け、今回は SaaS について深堀したいと思います。
 
 ## SaaS type offer とは
-本 offer type は他のものとは一風をかくしまして、既存サービスが存在することが前提になります。既存サービスに対する Azure Marketplace からの導線として、Entra ID を利用した認証・認可の導線となるイベントを受け取る Web アプリケーションを自作成してサービスの購入・課金・解約等を制御する流れになります。
-当たり前ですが、そんな Web アプリケーションを一から自作するのは現実的ではありません。そのために Microsoft は以下の SaaS Accelerator と呼ばれるテンプレートを用意しています。
+本 offer type は他とは一線を画しまして、既存の自身で作成済のサービスが存在することが前提になります。既存サービスに対する Azure Marketplace からの導線として、Entra ID を利用した認証・認可のイベントを受け取る Web アプリケーションを自作し、サービスの購入・課金・解約等を制御する流れになります。
+当たり前ですが、そんな Web アプリケーションを一から試行錯誤で自作するのは現実的ではありません。そのために Microsoft は以下の SaaS Accelerator と呼ばれるテンプレートを用意しています。
 https://github.com/Azure/Commercial-Marketplace-SaaS-Accelerator
 
-上記をデプロイすると Azure Marketplace からリダイレクトされる先の Web ポータル、Azure Marketplace からのイベントを受け取るための Web サービス、ユーザの購入情報等が格納される SQL DB 等がデプロイされます。
-こいつら自身は何のサービスも提供しないので、実際にサービスを提供する際は上記の SaaS Accelerator のアプリを少しカスタマイズしてリダイレクト処理を入れるといった流れが必要だと思います。
+上記をデプロイすると Azure Marketplace からリダイレクトされる先の Web ポータル、Azure Marketplace からのイベントを受け取るための Web サービス、ユーザの購入情報等が格納される SQL DB 等がデプロイ・設定することができます。
+こいつら自身は Azure Marketplace との連携機能以外は何の機能も提供しません。Azure Marketplace 上でサービスを購入後に自身のサービスを提供するサイトに誘導する場合、上記の SaaS Accelerator のアプリを少しカスタマイズしてリダイレクト処理を入れるといった流れが必要です。
 
 ## 本題の custom dimensions とは？
 SaaS type offer には標準的な課金方式があります。以下の様に「月 or 年額いくら」や「ユーザ単位でいくら」という課金単位なら比較的簡単です。
 ![](/images/azuremarketplace-saas-customdimensions-01/standard-billing-01.png) 
-ポイントは上記に該当しない場合でしょう。分かりやすいのが SendGrid さん等で「メールを何通送ったら幾ら」というのは上記の課金方式に該当しません。
+ポイントは上記に該当しない場合でしょう。分かりやすいのが SendGrid さん等で「メールを何通送ったら幾ら」というもので、これは上記の課金方式に該当しません。
 
 これを解決するために存在するのが Custom Dimensions です。以下に公式サイトがあります。
 https://learn.microsoft.com/en-us/partner-center/marketplace-offers/saas-metered-billing
 
-こちらを利用することで「こういう項目に対し、この数量に対して、これだけ課金して」というのを Partner Center Portal 上で定義することで利用可能になります。実際の利用の流れは以下です。
+こちらを利用するには「こういう項目に対し、この数量に対して、これだけ課金して」というのを Partner Center Portal 上で定義することで利用可能になります。実際の利用の流れは以下です。
 - Partner Center Portal 上で meter 定義
 - Service Principal 等の設定（ Commercial-Marketplace-SaaS-Accelerator を利用している場合、そちらが作成した Service Principal を使う）
 - 自身の pro-code で課金 API 呼ぶ
 
-最後の「自身の pro-code で課金 API 呼ぶ」はハードルの高い方も多いと思います。そうです。課金を細かくカスタマイズする場合、自分で項目的義をした後はいつ課金するか、どう課金するかは自分で API を呼んで制御する必要があるのです（まぁ、全てのビジネスシナリオにプラットフォーム側としても対応できないので、折衷案なのかもしれませんが）。
+最後の「自身の pro-code で課金 API 呼ぶ」はハードルの高い方も多いと思います。そうです。課金を細かくカスタマイズする場合、自分で項目定義をした後は「いつ課金するか」や「どう課金するか」は自分で API を呼んで制御する必要があるのです（まぁ、プラットフォーム側としても全ての課金シナリオに対応できないので、折衷案なのかもしれませんが）。
 
 ## 実際に custom dimensions を使ってみる
 上記で記載した通り、まずは Partner Center Portal 上で項目を定義します。以下は既に項目定義後に Offer を Publish しています。一度公開するとその後は同じ Plan 内では項目を編集できないので注意してください。
@@ -125,8 +125,12 @@ internal static class Program
 
 ```
 
-実行後は以下の様な結果となります。
+アプリケーションの実行後は以下の様な結果となります。
 ![](/images/azuremarketplace-saas-customdimensions-01/program-result-01.png) 
 
-上記で Accepted が返ってきているので、Azure Marketplace 側で課金を受け付けたことが分かります。本当は「API でエラー帰ってきたらどうするの？」や API が一時間ごとの課金なので、短時間で送りまくるとだめだったりします。さらに、課金が実際に表示されるのは翌日以降だったりと色々とあるのですが、とりあえずまずは基本のノウハウです。
+上記では API のレスポンスとして Accepted が返ってきているので、Azure Marketplace 側で課金を受け付けたことが分かります。課金の情報が Azure Portal 側に反映されるのは翌日以降ですが（汗
+本当は「API でエラー帰ってきたらどうするの？」等を考慮する必要は当然ありますし、API が一時間ごとの課金なので、短時間で送りまくると上手く課金されなかったりします。現実的には個別のデータストアを用意し、そちらから１時間ごとに実行する様なバッチで実行するのが良いでしょう。とりあえずまずは基本のノウハウです。
 
+## References
+- https://learn.microsoft.com/en-us/partner-center/marketplace-offers/marketplace-metering-service-apis
+- https://learn.microsoft.com/en-us/partner-center/marketplace-offers/pc-saas-fulfillment-subscription-api#get-list-of-all-subscriptions
