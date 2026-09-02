@@ -128,7 +128,70 @@ internal static class Program
 アプリケーションの実行後は以下の様な結果となります。
 ![](/images/azuremarketplace-saas-customdimensions-01/program-result-01.png) 
 
-上記では API のレスポンスとして Accepted が返ってきているので、Azure Marketplace 側で課金を受け付けたことが分かります。課金の情報が Azure Portal 側に反映されるのは翌日以降ですが（汗
+上記では API のレスポンスとして Accepted が返ってきているので、Azure Marketplace 側で課金を受け付けたことが分かります。
+
+## 実行結果のチェック
+上記を実行後、24時間以上経っても顧客側の Azure Portal/Partner Center Portal の課金メーターに反映されていませんでした。「どういうことだ？」と思い、以下のコマンドを実行しました。
+
+```powershell
+# Publisher Tenant
+$tenantId     = "publisher-tenant-id"
+$clientId     = "marketplace-aad-client-id"
+$clientSecret = "client-secret"
+
+# Marketplace API Resource
+$scope = "20e940b3-4c77-4b0b-9a53-9e16a1b010a7/.default"
+
+# AAD Token取得
+$body = @{
+    client_id     = $clientId
+    client_secret = $clientSecret
+    scope         = $scope
+    grant_type    = "client_credentials"
+}
+
+$token = (
+    Invoke-RestMethod `
+        -Method POST `
+        -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token" `
+        -Body $body `
+        -ContentType "application/x-www-form-urlencoded"
+).access_token
+
+# 過去24時間のUsage Event取得
+$headers = @{
+    Authorization = "Bearer $token"
+}
+
+$usageStartDate = [System.Web.HttpUtility]::UrlEncode((Get-Date).AddDays(-7).ToUniversalTime().ToString("o"))
+ 
+$uri = "https://marketplaceapi.microsoft.com/api/usageEvents" +"?api-version=2018-08-31" +"&usageStartDate=$usageStartDate"
+
+Invoke-RestMethod `
+    -Method GET `
+    -Uri $uri `
+    -Headers $headers
+```
+
+実行した結果、以下の様に課金ステータスが submitted 状態で processed になっていないことが分かりました。どの程度で Partner Center Portal 側に具体的に反映されるか分かりませんが、途中経過として。
+```text
+usageDate           : 2026-08-31T00:00:00Z
+usageResourceId     : 8cc9c3f2-a7a9-421b-c0fd-xxxxxxxxxxxxx
+dimension           : qa_email_num
+planId              : test_private_offer
+planName            : 
+offerId             : your-offer-id
+offerName           : 
+offerType           : SaaS
+azureSubscriptionId : 6ad3de36-08ca-45ea-b674-xxxxxxxxxxxxx
+reconStatus         : Submitted
+submittedQuantity   : 1.0
+processedQuantity   : 0.0
+submittedCount      : 1
+```
+
+## まとめ
+
 本当は「API でエラー帰ってきたらどうするの？」等を考慮する必要は当然ありますし、API が一時間ごとの課金なので、短時間で送りまくると上手く課金されなかったりします。現実的には個別のデータストアを用意し、そちらから１時間ごとに実行する様なバッチで実行するのが良いでしょう。とりあえずまずは基本のノウハウです。
 
 ## References
