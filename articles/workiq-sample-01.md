@@ -20,7 +20,7 @@ publication_name: "microsoft"
 Work IQ の根幹である「Microsoft Office 365 上で蓄積したデータを読み取る」という機能は非常に強力ですが、すなわち「本番環境で M365 が動いている Entra ID テナントの API を呼ばせて」と言うことになります。
 実際には多くのプロジェクトを見ていると「Azure 環境」と「M365 環境」は Entra ID テナントを分けているので、この際に「Azure 環境の Entra ID テナントとは異なる Entra ID テナントの情報を読み取る」と言うことになります。これが実現できないのかと言われれば、当然実現は可能です。Entra ID を操作する際に利用する Service Principal を「M365 環境」側の Entra ID テナントで作成し、その情報を Azure 環境側に持ち込めば実現可能です。アーキテクチャ図的には以下になります。
 
-![](/images/workiq-sample-architecture-01.png) 
+![](/images/workiq-sample-01/workiq-sample-architecture-01.png) 
 
 ただし、後述しますが Work IQ 従量課金分の Azure Subscription は「M365 環境」の Entra ID テナント配下に紐づける必要があります。こちらの Service Principal を活用することで Web アプリ・クライアントアプリは勿論、Azure/On-premise/AWS/GCP を問わずに Work IQ を任意の場所で利用することができます。
 
@@ -85,7 +85,7 @@ az ad sp create --id fdcc1f02-fc51-4226-8753-f668596af7f7
 
 ## C# アプリで実際に動かしてみる
 
-上記で設定した Service Principal の情報を
+上記で設定した Service Principal の情報を利用して、アプリケーションを実行します。質問として「７日以内の Teams やメール等の情報を見て終わってない様なタスクを挙げてほしい」な文章を入れています。現時点では SDK 等は無く、エンドポイントを直接叩く必要がありそうです。
 
 ```csharp
 
