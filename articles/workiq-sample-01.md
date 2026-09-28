@@ -2,7 +2,7 @@
 title: "WorkIQ API を利用して自分の活動について相談してみる"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["SemanticKernel", "AI", "Java"]
+topics: ["MCP", "AI", "csharp"]
 published: true
 publication_name: "microsoft"
 ---
