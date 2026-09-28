@@ -7,10 +7,10 @@ published: true
 publication_name: "microsoft"
 ---
 
-皆様、Work IQ は使っていますでしょうか？ Microsoft が推進する IQ 群（ Fabric IQ, Foundry ID, Work IQ, Web IQ）の中で、もっともよく利用しているはずなのに、もっとも意識して使っていない機能といっても過言ではないと思っています。Work IQ は Microsoft Office 365 上で個人が蓄積したデータを読み取った結果を RAG の様な形で参照可能人していますが、明示的に呼び出した記憶のあるかは皆無なのではないでしょうか。
+皆様、Work IQ は使っていますでしょうか？ Microsoft が推進する IQ 群（ Fabric IQ, Foundry ID, Work IQ, Web IQ）の中で、もっともよく利用しているはずなのに、もっとも意識して使っていない機能といっても過言ではないと思っています。Work IQ は Microsoft Office 365 上で個人が蓄積したデータを読み取った結果を RAG の様な形で参照可能人していますが、明示的に呼び出した記憶のある方は皆無なのではないでしょうか。
 それもそのはず、普段の M365 Copilot 利用時には内部で勝手に呼んでくれています。Work IQ で蓄積されている個人の業務遂行時の情報を取得し、その結果をもって普段の Teams での会話や Outlook のメールなどを見て「お前、今週はこのフォローアップ忘れてんぞ」といったような会話がエージェントとして出来るわけです。
 
-実は Work IQ は自身で明示的に呼び出すことが可能です。以下の記事にも記載がありますが、A2A/MCP/REST 形式での API 呼び出しが可能になっています。
+実は Work IQ は我々自身が明示的に呼び出すことが可能です。以下の記事にも記載がありますが、A2A/MCP/REST 形式での API 呼び出しが可能になっています。
 - [Work IQ overview](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/)
 
 加えて、既に C# 等でのアンプルアプリが以下の様に公開されています。こちらを利用することで、自身のアプリケーションから明示的に Work IQ を呼び出すことができるのが分かるでしょう。
@@ -22,7 +22,7 @@ Work IQ の根幹である「Microsoft Office 365 上で蓄積したデータを
 
 ![](/images/workiq-sample-01/workiq-sample-architecture-01.png) 
 
-ただし、後述しますが Work IQ 従量課金分の Azure Subscription は「M365 環境」の Entra ID テナント配下に紐づける必要があります。こちらの Service Principal を活用することで Web アプリ・クライアントアプリは勿論、Azure/On-premise/AWS/GCP を問わずに Work IQ を任意の場所で利用することができます。
+ただし、後述しますが Work IQ 従量課金分の Azure Subscription は「M365 環境」の Entra ID テナント配下に紐づける必要があります。「M365 環境」側で作成した Service Principal の情報を別環境から利用することで Web アプリ・クライアントアプリは勿論、Azure/On-premise/AWS/GCP を問わずに Work IQ を任意の場所で利用することができます。
 
 ## 実際に利用作成するサンプル
 今回は以下の様に C# Console アプリから直接呼び出します。今回は MCP サーバ形式で呼び出しますが、もちろん REST/A2A での呼び出しも可能です。
